@@ -1,6 +1,6 @@
-name: Docker Compose
+name: Docker Compose (CL-fork)
 description: Run any CI step in isolated Docker containers using Docker Compose
-author: https://github.com/buildkite
+author: https://github.com/commonlit
 requirements:
   - docker
   - docker-compose
@@ -74,6 +74,8 @@ configuration:
       type: boolean
     mount-buildkite-agent:
       type: boolean
+    use-prior-image:
+      type: boolean
   oneOf:
     - required:
       - run
@@ -100,3 +102,4 @@ configuration:
     user: [ run ]
     propagate-uid-gid: [ run ]
     mount-buildkite-agent: [ run ]
+    use-prior-image: [ build ]

@@ -5,6 +5,7 @@ image_repository="$(plugin_read_config IMAGE_REPOSITORY)"
 pull_retries="$(plugin_read_config PULL_RETRIES "0")"
 push_retries="$(plugin_read_config PUSH_RETRIES "0")"
 override_file="docker-compose.buildkite-${BUILDKITE_BUILD_NUMBER}-override.yml"
+use_prior_image="$(plugin_read_config USE_PRIOR_IMAGE)"
 build_images=()
 
 service_name_cache_from_var() {
@@ -33,6 +34,15 @@ if [[ "$(plugin_read_config NO_CACHE "false")" == "false" ]] ; then
     echo "~~~ :docker: Pulling cache image for $service_name"
     if retry "$pull_retries" plugin_prompt_and_run docker pull "$service_image" ; then
       printf -v "$cache_image_name" "%s" "$service_image"
+
+      echo $(plugin_read_config USE_PRIOR_IMAGE)
+      if [[ "$(plugin_read_config USE_PRIOR_IMAGE "false")" == "true" ]] ; then
+        echo "Found matching image $cache_image_name, marking and skipping build"
+
+        set_prebuilt_image "$service_name" "$service_image"
+
+        exit 0
+      fi
     else
       echo "!!! :docker: Pull failed. $service_image will not be used as a cache for $service_name"
     fi
