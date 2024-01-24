@@ -2,6 +2,11 @@
 
 A [Buildkite plugin](https://buildkite.com/docs/agent/v3/plugins) that lets you build, run and push build steps using [Docker Compose](https://docs.docker.com/compose/).
 
+This fork of Buildkite's default plugin. It allows for the skipping of build
+steps if an image with the specified tag already exists. This can dramatically
+speed up certain steps such as dependency installs or asset builds if your
+images are tagged with a proper cache key.
+
 * Containers are built, run and linked on demand using Docker Compose
 * Containers are namespaced to each build job, and cleaned up after use
 * Supports pre-building of images, allowing for fast parallel builds across distributed agents
@@ -374,6 +379,22 @@ steps:
 In the example above, the `myservice_intermediate:buildkite-build-${BUILDKITE_BUILD_NUMBER}` is one group named "intermediate", and `myservice:${BUILDKITE_BRANCH}` and `myservice:latest`
 are another (with a default name). The first successfully downloaded image in each group will be used as a cache.
 
+## Reusing previously built images
+
+If an build image has already been built previously, you can skip it if it
+already exists on the repository.
+
+```yaml
+steps:
+    - label: ":docker: Build an image"
+      plugins:
+          - docker-compose#v3.8.0:
+                build: app
+                image-repository: index.docker.io/myorg/myrepo
+                cache-from: app:index.docker.io/myorg/myrepo/myapp:123
+                use-prior-image: true
+```
+
 ## Configuration
 
 ### Main Commands
@@ -714,6 +735,11 @@ It will add the `--ssh` option to the build command with the passed value (if `t
 ### `secrets` (optional, build only, array of strings)
 
 All elements in this array will be passed literally to the `build` command as parameters of the [`--secrets` option](https://docs.docker.com/engine/reference/commandline/buildx_build/#secret). Note that you must have BuildKit enabled for this option to have any effect and special `RUN` stanzas in your Dockerfile to actually make use of them.
+
+### `use-prior-image` (optional, build only)
+
+When true, the build step will be skipped if the `cache-from` image exists on
+the remote repository. The run will use the existing image in later steps.
 
 ## Developing
 

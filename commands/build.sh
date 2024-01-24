@@ -76,6 +76,21 @@ if [[ "$(plugin_read_config NO_CACHE "false")" == "false" ]] ; then
     # The variable with this name will hold an array of group names:
     cache_image_name="$(service_name_cache_from_var "$service_name")"
 
+    # If we're using prior images and we find an exact match, terminate and skip
+    # all further processing. This won't work for a multi-image build step, only
+    # a single service can be built this way
+    if [[ "$(plugin_read_config USE_PRIOR_IMAGE "false")" == "true" ]] && \
+      docker manifest inspect "$service_image" > /dev/null; then
+        echo ":docker: Found an image! Marking and skipping $service_image"
+        set_prebuilt_image "$service_name" "$service_image"
+
+        for service_alias in $(plugin_read_list BUILD_ALIAS) ; do
+          set_prebuilt_image "$service_alias" "$service_image"
+        done
+
+        exit 0
+    fi
+
     if [[ -n ${!cache_image_name+x} ]]; then
       if [[ "$(named_array_values "${cache_image_name}")" =~ ${cache_from_group_name} ]]; then
         continue # skipping since there's already a pulled cache image for this service+group

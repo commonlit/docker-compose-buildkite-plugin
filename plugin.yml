@@ -120,6 +120,8 @@ configuration:
       minimum: 1
     workdir:
       type: string
+    use-prior-image:
+      type: boolean
   anyOf:
     - required:
       - run
@@ -158,3 +160,4 @@ configuration:
     volumes: [ run ]
     wait: [ run ]
     workdir: [ run ]
+    use-prior-image: [ build ]
